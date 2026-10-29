@@ -1,0 +1,8 @@
+{
+    "proxy": {
+        "url": "http://USERNAME:PASSWORD@HOST:PORT"
+    },
+    "discord": {
+        "webhookUrl": "https://discord.com/api/webhooks/1562970210812563552/6Tfb-Kf60E0SHh-Qe1Cm93BcIeeXZ5VtzXGFMAbD93gb_yChZ5d3qJ2Nq9QzlqFmRXGP"
+    }
+}
